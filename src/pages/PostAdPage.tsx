@@ -116,7 +116,8 @@ const PostAdPage = () => {
         description: "Your toy listing is now available for others to see.",
       });
       
-      navigate('/my-ads');
+      // Changed from '/my-ads' to '/profile' since there's no my-ads route in the App.tsx
+      navigate('/profile');
     } catch (err) {
       toast({
         variant: "destructive",

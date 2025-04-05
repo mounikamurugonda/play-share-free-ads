@@ -1,9 +1,41 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-// Sample list of US cities - in a real app, this would come from an API
+// Sample list of US addresses - in a real app, this would come from an API
+const US_ADDRESSES = [
+  "123 Main St, New York, NY 10001",
+  "456 Broadway, New York, NY 10002",
+  "789 5th Avenue, New York, NY 10003",
+  "101 Hollywood Blvd, Los Angeles, CA 90001",
+  "202 Sunset Blvd, Los Angeles, CA 90002",
+  "303 Rodeo Dr, Beverly Hills, CA 90210",
+  "404 Michigan Ave, Chicago, IL 60601",
+  "505 State St, Chicago, IL 60602",
+  "606 Lake Shore Dr, Chicago, IL 60603",
+  "707 Market St, San Francisco, CA 94103",
+  "808 Union Square, San Francisco, CA 94108",
+  "909 Fisherman's Wharf, San Francisco, CA 94133",
+  "1010 Lombard St, San Francisco, CA 94109",
+  "1111 Mission St, San Francisco, CA 94103",
+  "1212 Powell St, San Francisco, CA 94108",
+  "1313 Haight St, San Francisco, CA 94117",
+  "1414 Castro St, San Francisco, CA 94114",
+  "1515 Valencia St, San Francisco, CA 94110",
+  "1616 Divisadero St, San Francisco, CA 94115",
+  "1717 Ocean Ave, San Francisco, CA 94112",
+  // Additional entries with street addresses
+  "123 Peachtree St, Atlanta, GA 30303",
+  "456 Piedmont Ave, Atlanta, GA 30308",
+  "789 Ponce de Leon Ave, Atlanta, GA 30306",
+  "101 First St, Austin, TX 78701",
+  "202 Congress Ave, Austin, TX 78701",
+  "303 Sixth St, Austin, TX 78701",
+  "404 Rainey St, Austin, TX 78701",
+  "505 Lavaca St, Austin, TX 78701"
+];
+
+// Also include the simpler city/state entries
 const US_CITIES = [
   "New York, NY",
   "Los Angeles, CA",
@@ -61,6 +93,9 @@ const US_CITIES = [
   "Staten Island, NY"
 ];
 
+// Combine both for a comprehensive list
+const LOCATIONS = [...US_ADDRESSES, ...US_CITIES];
+
 interface LocationAutocompleteProps {
   id: string;
   value: string;
@@ -83,8 +118,8 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   // Filter suggestions based on user input
   useEffect(() => {
     if (value.length > 1) {
-      const filtered = US_CITIES.filter(city =>
-        city.toLowerCase().includes(value.toLowerCase())
+      const filtered = LOCATIONS.filter(location =>
+        location.toLowerCase().includes(value.toLowerCase())
       ).slice(0, 5); // Limit to 5 suggestions
       setSuggestions(filtered);
       setIsOpen(filtered.length > 0);
