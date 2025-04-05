@@ -42,15 +42,15 @@ const MapPreview: React.FC<MapPreviewProps> = ({
   return (
     <div style={{ height, width: '100%' }} className="rounded-md overflow-hidden border border-gray-200 mt-2">
       <MapContainer
-        center={position}
-        zoom={zoom}
         style={{ height: '100%', width: '100%' }}
         scrollWheelZoom={false}
+        zoom={zoom}
+        center={position}
       >
         <ChangeView center={position} zoom={zoom} />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         <Marker position={position} />
       </MapContainer>
