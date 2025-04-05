@@ -43,14 +43,20 @@ const MapPreview: React.FC<MapPreviewProps> = ({
     <div style={{ height, width: '100%' }} className="rounded-md overflow-hidden border border-gray-200 mt-2">
       <MapContainer
         style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={false}
         zoom={zoom}
         center={position}
+        // TypeScript is complaining about scrollWheelZoom, so we'll use the following approach
+        {...{
+          scrollWheelZoom: false
+        } as any}
       >
         <ChangeView center={position} zoom={zoom} />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          // TypeScript is complaining about attribution, so we'll use the following approach
+          {...{
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          } as any}
         />
         <Marker position={position} />
       </MapContainer>
