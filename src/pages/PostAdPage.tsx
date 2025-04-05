@@ -335,7 +335,7 @@ const PostAdPage = () => {
                   Back
                 </Button>
               ) : (
-                <div></div> {/* Empty div for spacing */}
+                <div></div> /* Empty div for spacing */
               )}
               
               {currentStep < 2 ? (
