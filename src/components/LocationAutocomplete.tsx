@@ -1,102 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin } from 'lucide-react';
-
-// Sample list of US addresses - in a real app, this would come from an API
-const US_ADDRESSES = [
-  "123 Main St, New York, NY 10001",
-  "456 Broadway, New York, NY 10002",
-  "789 5th Avenue, New York, NY 10003",
-  "101 Hollywood Blvd, Los Angeles, CA 90001",
-  "202 Sunset Blvd, Los Angeles, CA 90002",
-  "303 Rodeo Dr, Beverly Hills, CA 90210",
-  "404 Michigan Ave, Chicago, IL 60601",
-  "505 State St, Chicago, IL 60602",
-  "606 Lake Shore Dr, Chicago, IL 60603",
-  "707 Market St, San Francisco, CA 94103",
-  "808 Union Square, San Francisco, CA 94108",
-  "909 Fisherman's Wharf, San Francisco, CA 94133",
-  "1010 Lombard St, San Francisco, CA 94109",
-  "1111 Mission St, San Francisco, CA 94103",
-  "1212 Powell St, San Francisco, CA 94108",
-  "1313 Haight St, San Francisco, CA 94117",
-  "1414 Castro St, San Francisco, CA 94114",
-  "1515 Valencia St, San Francisco, CA 94110",
-  "1616 Divisadero St, San Francisco, CA 94115",
-  "1717 Ocean Ave, San Francisco, CA 94112",
-  // Additional entries with street addresses
-  "123 Peachtree St, Atlanta, GA 30303",
-  "456 Piedmont Ave, Atlanta, GA 30308",
-  "789 Ponce de Leon Ave, Atlanta, GA 30306",
-  "101 First St, Austin, TX 78701",
-  "202 Congress Ave, Austin, TX 78701",
-  "303 Sixth St, Austin, TX 78701",
-  "404 Rainey St, Austin, TX 78701",
-  "505 Lavaca St, Austin, TX 78701"
-];
-
-// Also include the simpler city/state entries
-const US_CITIES = [
-  "New York, NY",
-  "Los Angeles, CA",
-  "Chicago, IL",
-  "Houston, TX",
-  "Phoenix, AZ",
-  "Philadelphia, PA",
-  "San Antonio, TX",
-  "San Diego, CA",
-  "Dallas, TX",
-  "San Jose, CA",
-  "Austin, TX",
-  "Jacksonville, FL",
-  "Fort Worth, TX",
-  "Columbus, OH",
-  "San Francisco, CA",
-  "Charlotte, NC",
-  "Indianapolis, IN",
-  "Seattle, WA",
-  "Denver, CO",
-  "Washington, DC",
-  "Boston, MA",
-  "El Paso, TX",
-  "Nashville, TN",
-  "Detroit, MI",
-  "Portland, OR",
-  "Memphis, TN",
-  "Oklahoma City, OK",
-  "Las Vegas, NV",
-  "Louisville, KY",
-  "Baltimore, MD",
-  "Milwaukee, WI",
-  "Albuquerque, NM",
-  "Tucson, AZ",
-  "Fresno, CA",
-  "Sacramento, CA",
-  "Mesa, AZ",
-  "Kansas City, MO",
-  "Atlanta, GA",
-  "Long Beach, CA",
-  "Colorado Springs, CO",
-  "Raleigh, NC",
-  "Miami, FL",
-  "Oakland, CA",
-  "Minneapolis, MN",
-  "Tulsa, OK",
-  "Cleveland, OH",
-  "Wichita, KS",
-  "Arlington, TX",
-  "New Orleans, LA",
-  "Brooklyn, NY",
-  "Queens, NY",
-  "Manhattan, NY",
-  "Bronx, NY",
-  "Staten Island, NY"
-];
-
-// Combine both for a comprehensive list
-const LOCATIONS = [...US_ADDRESSES, ...US_CITIES];
+import { MapPin, Loader2 } from 'lucide-react';
+import { useLocationSuggestions } from '@/hooks/useLocationSuggestions';
+import LocationSuggestions from './LocationSuggestions';
 
 interface LocationAutocompleteProps {
   id: string;
@@ -115,24 +23,13 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   required = false,
   onCoordinatesChange,
 }) => {
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // Filter suggestions based on user input
-  useEffect(() => {
-    if (value.length > 1) {
-      const filtered = LOCATIONS.filter(location =>
-        location.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5); // Limit to 5 suggestions
-      setSuggestions(filtered);
-      setIsOpen(filtered.length > 0);
-    } else {
-      setSuggestions([]);
-      setIsOpen(false);
-    }
-  }, [value]);
+  
+  const { suggestions, isOpen, setIsOpen } = useLocationSuggestions({
+    value,
+    maxSuggestions: 5
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -145,7 +42,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [setIsOpen]);
 
   const handleSelect = (suggestion: string) => {
     onChange(suggestion);
@@ -195,7 +92,7 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   return (
     <div className="relative" ref={wrapperRef}>
       <div className="flex gap-2">
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <Input
             id={id}
             value={value}
@@ -204,7 +101,18 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
             required={required}
             autoComplete="off"
             onFocus={() => value.length > 1 && suggestions.length > 0 && setIsOpen(true)}
+            className="pr-8"
           />
+          {value.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Clear input"
+            >
+              ×
+            </button>
+          )}
         </div>
         <Button 
           type="button" 
@@ -213,26 +121,25 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
           onClick={handleUseMyLocation}
           disabled={isLoadingLocation}
         >
-          <MapPin className="w-4 h-4 mr-2" />
-          {isLoadingLocation ? "Locating..." : "Use my location"}
+          {isLoadingLocation ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <span>Locating...</span>
+            </>
+          ) : (
+            <>
+              <MapPin className="w-4 h-4 mr-2" />
+              <span>Use my location</span>
+            </>
+          )}
         </Button>
       </div>
       
-      {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto">
-          <ul className="py-1">
-            {suggestions.map((suggestion, index) => (
-              <li
-                key={index}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                onClick={() => handleSelect(suggestion)}
-              >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <LocationSuggestions
+        suggestions={suggestions}
+        isOpen={isOpen}
+        onSelect={handleSelect}
+      />
     </div>
   );
 };

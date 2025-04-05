@@ -119,14 +119,19 @@ const ToyDetailsForm: React.FC<ToyDetailsFormProps> = ({
       
       <div className="space-y-2">
         <Label htmlFor="location">Location</Label>
-        <LocationAutocomplete
-          id="location"
-          value={location}
-          onChange={handleLocationChange}
-          onCoordinatesChange={handleCoordinatesChange}
-          placeholder="e.g. Brooklyn, NY"
-          required
-        />
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">
+            Start typing to see suggestions or use your current location
+          </p>
+          <LocationAutocomplete
+            id="location"
+            value={location}
+            onChange={handleLocationChange}
+            onCoordinatesChange={handleCoordinatesChange}
+            placeholder="e.g. Brooklyn, NY"
+            required
+          />
+        </div>
         
         {coordinates && (
           <MapPreview 
