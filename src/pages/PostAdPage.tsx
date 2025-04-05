@@ -27,6 +27,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { TOY_CATEGORIES } from '@/constants/categories';
 import { Camera, Loader2 } from 'lucide-react';
+import LocationAutocomplete from '@/components/LocationAutocomplete';
 
 const PostAdPage = () => {
   const navigate = useNavigate();
@@ -254,10 +255,10 @@ const PostAdPage = () => {
                     
                     <div className="space-y-2">
                       <Label htmlFor="location">Location</Label>
-                      <Input 
-                        id="location" 
+                      <LocationAutocomplete
+                        id="location"
                         value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                        onChange={setLocation}
                         placeholder="e.g. Brooklyn, NY"
                         required
                       />
