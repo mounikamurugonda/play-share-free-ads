@@ -1,10 +1,11 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { MapPin, Loader2 } from 'lucide-react';
 import { useLocationSuggestions } from '@/hooks/useLocationSuggestions';
+import { useGeolocation } from '@/hooks/useGeolocation';
 import LocationSuggestions from './LocationSuggestions';
+import LocationButton from './LocationButton';
+import { useToast } from '@/hooks/use-toast';
 
 interface LocationAutocompleteProps {
   id: string;
@@ -23,8 +24,9 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
   required = false,
   onCoordinatesChange,
 }) => {
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const { toast } = useToast();
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const { getCurrentLocation, isLoading, error } = useGeolocation();
   
   const { suggestions, isOpen, setIsOpen } = useLocationSuggestions({
     value,
@@ -44,6 +46,17 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
     };
   }, [setIsOpen]);
 
+  // Show error toast when geolocation fails
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Location Error",
+        description: error,
+      });
+    }
+  }, [error, toast]);
+
   const handleSelect = (suggestion: string) => {
     onChange(suggestion);
     setIsOpen(false);
@@ -59,33 +72,16 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
     }
   };
 
-  const handleUseMyLocation = () => {
-    setIsLoadingLocation(true);
-    
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // In a real app, you would use reverse geocoding to get the address
-          // For this demo, we'll just set a placeholder address
-          onChange("Current location (detected)");
-          
-          if (onCoordinatesChange) {
-            onCoordinatesChange(latitude, longitude);
-          }
-          
-          setIsLoadingLocation(false);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          setIsLoadingLocation(false);
-        },
-        { enableHighAccuracy: true }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser");
-      setIsLoadingLocation(false);
+  const handleUseMyLocation = async () => {
+    try {
+      const { latitude, longitude, formatted } = await getCurrentLocation();
+      onChange(formatted);
+      
+      if (onCoordinatesChange) {
+        onCoordinatesChange(latitude, longitude);
+      }
+    } catch (err) {
+      // Error is handled by the hook and displayed via toast
     }
   };
 
@@ -114,25 +110,10 @@ const LocationAutocomplete: React.FC<LocationAutocompleteProps> = ({
             </button>
           )}
         </div>
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="flex-shrink-0"
+        <LocationButton 
           onClick={handleUseMyLocation}
-          disabled={isLoadingLocation}
-        >
-          {isLoadingLocation ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              <span>Locating...</span>
-            </>
-          ) : (
-            <>
-              <MapPin className="w-4 h-4 mr-2" />
-              <span>Use my location</span>
-            </>
-          )}
-        </Button>
+          isLoading={isLoading}
+        />
       </div>
       
       <LocationSuggestions
