@@ -28,6 +28,7 @@ import Footer from '@/components/Footer';
 import { TOY_CATEGORIES } from '@/constants/categories';
 import { Camera, Loader2 } from 'lucide-react';
 import LocationAutocomplete from '@/components/LocationAutocomplete';
+import MapPreview from '@/components/MapPreview';
 
 const PostAdPage = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const PostAdPage = () => {
   const [condition, setCondition] = useState<'new' | 'like-new' | 'good' | 'fair' | 'poor'>('good');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -82,6 +84,14 @@ const PostAdPage = () => {
     
     setImages([...images, ...newImages]);
   };
+
+  const handleLocationChange = (value: string) => {
+    setLocation(value);
+  };
+
+  const handleCoordinatesChange = (lat: number, lng: number) => {
+    setCoordinates({ lat, lng });
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +118,7 @@ const PostAdPage = () => {
         category: categoryName,
         images,
         location,
+        coordinates: coordinates || undefined,
         userId: user.id
       });
       
@@ -259,10 +270,20 @@ const PostAdPage = () => {
                       <LocationAutocomplete
                         id="location"
                         value={location}
-                        onChange={setLocation}
+                        onChange={handleLocationChange}
+                        onCoordinatesChange={handleCoordinatesChange}
                         placeholder="e.g. Brooklyn, NY"
                         required
                       />
+                      
+                      {coordinates && (
+                        <MapPreview 
+                          latitude={coordinates.lat}
+                          longitude={coordinates.lng}
+                          height="250px"
+                          zoom={14}
+                        />
+                      )}
                     </div>
                   </>
                 )}

@@ -19,6 +19,7 @@ export interface ToyAd {
   category: string;
   images: string[];
   location: string;
+  coordinates?: { lat: number; lng: number };
   createdAt: Date;
   updatedAt: Date;
   userId: string;
